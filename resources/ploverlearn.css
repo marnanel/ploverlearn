@@ -1,0 +1,85 @@
+div {
+	width: 640px;
+	height: 433px;
+	background-color: #000;
+	color: #FFF;
+}
+
+#game {
+	display: none;
+}
+
+.playing #game {
+	display: block;
+}
+
+#splash {
+	background-image: url('plover.jpg');
+}
+
+.playing #splash {
+	display: none;
+}
+
+#splash * {
+	background-color: transparent;
+	font-family: sans-serif;
+	font-weight: bold;
+}
+
+div * {
+	position: relative;
+	text-align: center;
+	height: 1.5em;
+}
+
+#question {
+	top: 150px;
+	font-size: 20pt;
+}
+
+#answer {
+	top: 200px;
+	font-size: 14pt;
+}
+
+#hint {
+	top: 300px;
+	font-size: 10pt;
+}
+
+#title {
+	top: 100px;
+	font-size: 20pt;
+}
+
+#subtitle {
+	top: 150px;
+	font-size: 16pt;
+}
+
+#clicktostart {
+	top: 200px;
+	font-size: 10pt;
+}
+
+#clicktostart::before {
+	content: "Click to start";
+}
+
+table {
+	width: 640px;
+	border-collapse: collapse;
+}
+
+th {
+	padding: 0;
+	min-width: 128px;
+}
+
+td {
+	font-family: monospace;
+	font-size: 40px;
+	text-align: center;
+}
+

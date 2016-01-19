@@ -1,0 +1,13 @@
+Lesson 3F Exercise 1
+Fingerspelling!
+'The': T*P H* *E
+'quick': KW* *EU KR* K*
+'brown': PW* R* *O W* TPH*
+'fox': TP* *O KP*
+'jumps': SKWR* *U PH* P* S*
+'over': *O SR* *E R*
+'the': T* H* *E
+'lazy': HR* *A *STPKW KWR*
+'dog.': TK* *O *TPKW -P
+case_sensitive=true
+require_spaces=true
