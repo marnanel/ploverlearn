@@ -1,3 +1,48 @@
+
+///////////////////////////////////
+
+var PloverLearn = function(fields) {
+	this.fields = fields;
+	this.index = 0;
+};
+
+PloverLearn.prototype.title = function() {
+	return this.fields['title'];
+};
+
+PloverLearn.prototype.subtitle = function() {
+	return this.fields['subtitle'];
+};
+
+PloverLearn.prototype.currentQuestion = function() {
+	return this.fields['questions'][this.index][0];
+};
+
+PloverLearn.prototype.currentHint = function() {
+	return this.fields['questions'][this.index][1];
+};
+
+PloverLearn.prototype.answerMatches = function(answer) {
+	var question = this.currentQuestion();
+
+	return answer.toLowerCase() == question.toLowerCase();
+};
+
+PloverLearn.prototype.isLastQuestion = function() {
+	return this.index == this.fields['questions'].length-1;
+};
+
+PloverLearn.prototype.moveToNextQuestion = function() {
+	if (this.isLastQuestion()) {
+		this.index = 0;
+	} else {
+		this.index++;
+	}
+};
+
+///////////////////////////////////
+
+
 var STROKE_FINISHED_TIMEOUT = 30; // ms
 var METRICS_DISPLAY_INTERVAL = 500; // ms
 var HINT_OFFER_TIMES = 2;

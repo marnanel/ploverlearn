@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>QUnit basic example</title>
+  <link rel="stylesheet" href="https://code.jquery.com/qunit/qunit-1.20.0.css">
+</head>
+<body>
+  <div id="qunit"></div>
+  <div id="qunit-fixture"></div>
+  <script src="https://code.jquery.com/qunit/qunit-1.20.0.js"></script>
+  <script src="ploverlearn.js"></script>
+  <script>
+    QUnit.test( "a basic test example", function( assert ) {
+      var value = "hello";
+      assert.equal( value, "hello", "We expect value to be hello" );
+    });
+
+    function standardTestFields() {
+	return {
+			'title': 'Oranges',
+			'subtitle': 'Lemons',
+			'questions': [['Apple', 'crumble'], ['Banana', 'fritter'], ['Cherry', 'bakewell']],
+		}
+    }
+
+    QUnit.test( "title and subtitle", function( assert ) {
+	var fields = standardTestFields();
+	var pl = new PloverLearn(fields);
+
+	assert.equal(pl.title(), "Oranges", "Title should be 'Oranges'" );
+	assert.equal(pl.subtitle(), "Lemons", "Subtitle should be 'Lemons'" );
+    });
+
+    QUnit.test( "sequence progression", function( assert ) {
+	var fields = standardTestFields();
+	var pl = new PloverLearn(fields);
+
+	assert.equal(pl.currentQuestion(), "Apple", "First question should be 'Apple'" );
+	assert.equal(pl.currentHint(), "crumble", "First hint should be 'crumble'" );
+	assert.equal(pl.isLastQuestion(), false, "First question is not the last" );
+
+	pl.moveToNextQuestion();
+
+	assert.equal(pl.currentQuestion(), "Banana", "First question should be 'Banana'" );
+	assert.equal(pl.currentHint(), "fritter", "Second hint should be 'fritter'" );
+	assert.equal(pl.isLastQuestion(), false, "Second question is not the last" );
+
+	pl.moveToNextQuestion();
+
+	assert.equal(pl.currentQuestion(), "Cherry", "Third question should be 'Cherry'" );
+	assert.equal(pl.currentHint(), "bakewell", "Third hint should be 'bakewell'" );
+	assert.equal(pl.isLastQuestion(), true, "Third question *is* the last" );
+
+	pl.moveToNextQuestion();
+
+	assert.equal(pl.currentQuestion(), "Apple", "Fourth question should be 'Apple' (we have wrapped)" );
+	assert.equal(pl.currentHint(), "crumble", "Fourth hint should be 'crumble'" );
+	assert.equal(pl.isLastQuestion(), false, "Fourth question is not the last" );
+    });
+
+    QUnit.test( "string matching - plain", function( assert ) {
+	var fields = standardTestFields();
+	var pl = new PloverLearn(fields);
+
+	assert.equal(pl.currentQuestion(), "Apple", "Current question is 'Apple'");
+	assert.ok(pl.answerMatches('Apple'), "'Apple' matches");
+	assert.ok(pl.answerMatches('apple'), "'apple' matches");
+	assert.ok(pl.answerMatches('APPLE'), "'APPLE' matches");
+	assert.ok(pl.answerMatches('ApPlE'), "'ApPlE' matches");
+    });
+
+
+  </script>
+</body>
+</html>
