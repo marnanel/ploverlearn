@@ -22,6 +22,26 @@ PloverLearnQuiz.prototype.currentHint = function() {
 	return this.fields['questions'][this.index][1];
 };
 
+// Returns whether the given answer matches the question,
+// according to the current setup. (For example, case might
+// or might not be significant, based on the flags.)
+//
+// Return values:
+//   - 0: this is not a match
+//   - "complete": this is a perfect match
+//                    (the entire string matches)
+//   - "partial": this is a partial match
+//                    (it's partway to a complete match)
+//
+// For example, suppose the current rules mean an answer
+// matches iff it's identical to the question, and that the
+// question is "plover". Then:
+//
+//    ""       -> "partial"
+//    "plov"   -> "partial"
+//    "plover" -> "complete"
+//    "xyzzy"  -> 0
+
 PloverLearnQuiz.prototype.answerMatches = function(answer) {
 	var question = this.currentQuestion();
 
