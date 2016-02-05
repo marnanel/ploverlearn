@@ -43,9 +43,21 @@ PloverLearnQuiz.prototype.currentHint = function() {
 //    "xyzzy"  -> 0
 
 PloverLearnQuiz.prototype.answerMatches = function(answer) {
-	var question = this.currentQuestion();
 
-	return answer.toLowerCase() == question.toLowerCase();
+	if (true) {
+		var q = this.currentQuestion().toLowerCase();
+		var a = answer.toLowerCase();
+
+		if (q==a) {
+			return "complete";
+		} else if (new RegExp('^'+a).test(q)) {
+			return "partial";
+		} else {
+			return 0;
+		}
+	}
+
+	return "(impossible)";
 };
 
 PloverLearnQuiz.prototype.isLastQuestion = function() {

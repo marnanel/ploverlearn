@@ -60,10 +60,15 @@
 	var pl = new PloverLearnQuiz(fields);
 
 	assert.equal(pl.currentQuestion(), "Apple", "Current question is 'Apple'");
-	assert.ok(pl.answerMatches('Apple'), "'Apple' matches");
-	assert.ok(pl.answerMatches('apple'), "'apple' matches");
-	assert.ok(pl.answerMatches('APPLE'), "'APPLE' matches");
-	assert.ok(pl.answerMatches('ApPlE'), "'ApPlE' matches");
+	assert.equal(pl.answerMatches('Apple'), "complete", "Exact match: complete");
+	assert.equal(pl.answerMatches('apple'), "complete", "Lowercase: complete");
+	assert.equal(pl.answerMatches('APPLE'), "complete", "Uppercase: complete");
+	assert.equal(pl.answerMatches('ApPlE'), "complete", "Weird case mix: complete");
+	assert.equal(pl.answerMatches('App'),   "partial",  "First three characters: partial");
+	assert.equal(pl.answerMatches('ap'),    "partial",  "First two characters, lowercase: partial");
+	assert.equal(pl.answerMatches(''),      "partial",  "Empty string: partial");
+	assert.equal(pl.answerMatches('P'),     0,          "Different letter: 0");
+	assert.equal(pl.answerMatches('Prune'), 0,          "Different word: 0");
     });
 
 
