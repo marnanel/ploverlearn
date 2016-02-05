@@ -1,38 +1,38 @@
 
 ///////////////////////////////////
 
-var PloverLearn = function(fields) {
+var PloverLearnQuiz = function(fields) {
 	this.fields = fields;
 	this.index = 0;
 };
 
-PloverLearn.prototype.title = function() {
+PloverLearnQuiz.prototype.title = function() {
 	return this.fields['title'];
 };
 
-PloverLearn.prototype.subtitle = function() {
+PloverLearnQuiz.prototype.subtitle = function() {
 	return this.fields['subtitle'];
 };
 
-PloverLearn.prototype.currentQuestion = function() {
+PloverLearnQuiz.prototype.currentQuestion = function() {
 	return this.fields['questions'][this.index][0];
 };
 
-PloverLearn.prototype.currentHint = function() {
+PloverLearnQuiz.prototype.currentHint = function() {
 	return this.fields['questions'][this.index][1];
 };
 
-PloverLearn.prototype.answerMatches = function(answer) {
+PloverLearnQuiz.prototype.answerMatches = function(answer) {
 	var question = this.currentQuestion();
 
 	return answer.toLowerCase() == question.toLowerCase();
 };
 
-PloverLearn.prototype.isLastQuestion = function() {
+PloverLearnQuiz.prototype.isLastQuestion = function() {
 	return this.index == this.fields['questions'].length-1;
 };
 
-PloverLearn.prototype.moveToNextQuestion = function() {
+PloverLearnQuiz.prototype.moveToNextQuestion = function() {
 	if (this.isLastQuestion()) {
 		this.index = 0;
 	} else {
@@ -42,46 +42,48 @@ PloverLearn.prototype.moveToNextQuestion = function() {
 
 ///////////////////////////////////
 
+var PloverLearnGame = function(fields) {
+
+	this.quiz = new PloverLearnQuiz(fields);
+	this.title = '';
+	this.subtitle = '';
+	this.buffer = '';
+	this.strokeTimerID = 0;
+	this.metricsDisplayTimerID = 0;
+
+	this.gameStartTime = 0;
+	this.wordCount = 0;
+	this.previousStrokeWasGood = true;
+
+	this.misstrokesThisQuestion = 0;
+};
+
+///////////////////////////////////
 
 var STROKE_FINISHED_TIMEOUT = 30; // ms
 var METRICS_DISPLAY_INTERVAL = 500; // ms
 var HINT_OFFER_TIMES = 2;
 var HINT_TEXT = '(hint?)';
 
-var title = '';
-var subtitle = '';
-var buffer = '';
-var strokeTimerID = 0;
-var metricsDisplayTimerID = 0;
-var allQuestions = [];
-var questionsRemaining = [];
-var currentHint = '';
+PloverLearnGame.prototype.displayNextQuestion = function() {
 
-var gameStartTime = 0;
-var wordCount = 0;
-var previousStrokeWasGood = true;
-
-var misstrokesThisQuestion = 0;
-
-function displayNextQuestion() {
-
-	if (questionsRemaining.length==0) {
-		endGame();
+	if (this.quiz.isLastQuestion()) {
+		this.endGame();
 	} else {
-		var nextQuestion = questionsRemaining.shift();
-		$("#question").text(nextQuestion[0]);
+		this.quiz.moveToNextQuestion();
+
+		$("#question").text(this.quiz.currentQuestion())
 		$("#answer").text('');
 		$("#hint").text('');
-		currentHint = nextQuestion[1];
 
-		buffer = '';
-		misstrokesThisQuestion = 0;
+		this.buffer = '';
+		this.misstrokesThisQuestion = 0;
 	}
-}
+};
 
-function displayMetrics() {
+PloverLearnGame.prototype.displayMetrics = function() {
 
-	var msElapsed = (new Date().getTime()) - gameStartTime;
+	var msElapsed = (new Date().getTime()) - this.gameStartTime;
 	var gameClockMinutes = Math.floor(msElapsed/60000);
 	var gameClockSeconds = Math.floor(msElapsed/1000)%60;
 	var gameClock = gameClockMinutes+':';
@@ -92,54 +94,59 @@ function displayMetrics() {
 
 	$("#time").text(gameClock);
 	$("#wpm").text(Math.floor(wordCount / (msElapsed/60000)));
-	$("#misstrokes").text(misstrokes);
-	$("#laststreak").text(lastStreak);
-	$("#beststreak").text(bestStreak);
-}
+	$("#misstrokes").text(this.misstrokes);
+	$("#laststreak").text(this.lastStreak);
+	$("#beststreak").text(this.bestStreak);
+};
 
 // XXX problem here: does a streak include
 // all strokes that make a correct word?
 // Because then you'd get extra marks for fingerspelling everything.
 
-function logGoodStroke() {
-	if (previousStrokeWasGood) {
-		lastStreak++;
+PloverLearnGame.prototype.logGoodStroke = function() {
+
+	if (this.previousStrokeWasGood) {
+		this.lastStreak++;
 	} else {
 		// we're starting a new good streak
-		lastStreak = 1;
+		this.lastStreak = 1;
 	}
 
-	if (bestStreak < lastStreak) {
-		bestStreak = lastStreak;
+	if (this.bestStreak < this.lastStreak) {
+		this.bestStreak = this.lastStreak;
 	}
 
-	previousStrokeWasGood = true;
-}
+	this.previousStrokeWasGood = true;
+};
 
-function logMisstroke() {
+PloverLearnGame.prototype.logMisstroke = function() {
 
-	misstrokes++;
-	misstrokesThisQuestion++;
+	this.misstrokes++;
+	this.misstrokesThisQuestion++;
 
-	if (misstrokesThisQuestion >= HINT_OFFER_TIMES &&
+	if (this.misstrokesThisQuestion >= HINT_OFFER_TIMES &&
 		$("#hint").text()=='') {
 
-		$("#hint").text(HINT_TEXT);
+		$("#hint").text(this.quiz.currentText());
 	}
 
-	previousStrokeWasGood = false;
-}
+	this.previousStrokeWasGood = false;
+};
 
-function strokeFinished() {
+PloverLearnGame.prototype.strokeFinished = function() {
 
 	// XXX this needs a rethink,
 	// because at present if you enter
 	// two misstrokes and then delete one,
 	// you get another misstroke for that.
 
-	$("#answer").text(buffer.slice(-40));
+	$("#answer").text(this.buffer.slice(-40));
 
 	var question = $("#question").text()
+
+// XXX this isn't going to work until we've fixed
+// PloverLearnQuiz.answerMatches() to check for partial
+// matches as well. Come back to it then.
 
 	if (buffer==question) {
 		// correct!
@@ -155,68 +162,67 @@ function strokeFinished() {
 		// misstroke
 		logMisstroke();
 	}
-}
+};
 
-function startGame() {
-	questionsRemaining = allQuestions;
-	displayNextQuestion();
+PloverLearnGame.prototype.startGame = function() {
+	this.displayNextQuestion();
 	$("body").addClass("playing");
 
-	gameStartTime = new Date().getTime();
-	wordCount = 0;
-	misstrokes = 0;
-	previousStrokeWasGood = true;
-	lastStreak = 0;
-	bestStreak = 0;
-	metricsDisplayTimerID = window.setInterval(displayMetrics, METRICS_DISPLAY_INTERVAL);
-}
+	this.gameStartTime = new Date().getTime();
+	this.wordCount = 0;
+	this.misstrokes = 0;
+	this.previousStrokeWasGood = true;
+	this.lastStreak = 0;
+	this.bestStreak = 0;
+	this.metricsDisplayTimerID = window.setInterval(this.displayMetrics, METRICS_DISPLAY_INTERVAL);
+};
 
-function endGame() {
-	displayMetrics();
-	window.clearInterval(metricsDisplayTimerID);
+PloverLearnGame.prototype.endGame = function() {
+	this.displayMetrics();
+	window.clearInterval(this.metricsDisplayTimerID);
 	$("body").removeClass("playing");
-}
+};
 
-function initialSetup() {
+PloverLearnGame.prototype.initialSetup = function() {
+
 	$(document).keypress(function(event) {
 
 		if (!$("body").hasClass("playing")) {
-			startGame();
+			this.startGame();
 		} else {
 
 			if (event.which==8) {
 				// Backspace
-				buffer = buffer.slice(0, -1);
+				this.buffer = this.buffer.slice(0, -1);
 			} else if (event.which==13) {
 				// Return: erase buffer
-				buffer = '';
+				this.buffer = '';
 			} else if (event.which>=32 && event.which<=126) {
 				// Character input.
-				buffer += String.fromCharCode(event.which);
+				this.buffer += String.fromCharCode(event.which);
 			}
 		
-			window.clearTimeout(strokeTimerID);
-			strokeTimerID = window.setTimeout(strokeFinished, STROKE_FINISHED_TIMEOUT);
+			window.clearTimeout(this.strokeTimerID);
+			this.strokeTimerID = window.setTimeout(this.strokeFinished, STROKE_FINISHED_TIMEOUT);
 		}
 	});
 
 	$("#splash").mousedown(function(event) {
-		startGame();
+		this.startGame();
 	});
 
 	$("#hint").mousedown(function(event) {
-		$("#hint").text(currentHint);
+		$("#hint").text(this.quiz.hint());
 	});
 
-	$("#title").text(theTitle);
-	$("#subtitle").text(theSubtitle);
-}
+	$("#title").text(this.quiz.title());
+	$("#subtitle").text(this.quiz.subtitle());
+};
 
 function ploverlearn(fields) {
-	theTitle = fields['title']
-	theSubtitle = fields['subtitle'];
-	allQuestions = fields['questions'];
 
-	$( initialSetup );
+	var game = new PloverLearnGame(fields);
+
+	$( ploverLearn.initialSetup );
 
 }

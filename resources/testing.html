@@ -22,7 +22,7 @@
 
     QUnit.test( "title and subtitle", function( assert ) {
 	var fields = standardTestFields();
-	var pl = new PloverLearn(fields);
+	var pl = new PloverLearnQuiz(fields);
 
 	assert.equal(pl.title(), "Oranges", "Title should be 'Oranges'" );
 	assert.equal(pl.subtitle(), "Lemons", "Subtitle should be 'Lemons'" );
@@ -30,7 +30,7 @@
 
     QUnit.test( "sequence progression", function( assert ) {
 	var fields = standardTestFields();
-	var pl = new PloverLearn(fields);
+	var pl = new PloverLearnQuiz(fields);
 
 	assert.equal(pl.currentQuestion(), "Apple", "First question should be 'Apple'" );
 	assert.equal(pl.currentHint(), "crumble", "First hint should be 'crumble'" );
@@ -57,7 +57,7 @@
 
     QUnit.test( "string matching - plain", function( assert ) {
 	var fields = standardTestFields();
-	var pl = new PloverLearn(fields);
+	var pl = new PloverLearnQuiz(fields);
 
 	assert.equal(pl.currentQuestion(), "Apple", "Current question is 'Apple'");
 	assert.ok(pl.answerMatches('Apple'), "'Apple' matches");
