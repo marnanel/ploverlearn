@@ -27,7 +27,7 @@ PloverLearnQuiz.prototype.currentHint = function() {
 PloverLearnQuiz.prototype.answerMatches = function(answer) {
 
 	var flags = 'i';
-	var pattern = '^'+this.currentQuestion()+'\s*$';
+	var pattern = '^\\s*'+this.currentQuestion()+'$';
 
 	var questionRegExp = new RegExp(pattern, flags);
 	return questionRegExp.test(answer);
@@ -141,15 +141,25 @@ PloverLearnGame.prototype.logMisstroke = function() {
 
 PloverLearnGame.prototype.strokeFinished = function() {
 
-	// XXX this needs a rethink,
-	// because at present if you enter
-	// two misstrokes and then delete one,
-	// you get another misstroke for that.
+	// we take a copy of this.buffer
+	// because "this" is obscured by $.each()
+	var b = this.buffer;
+
+	$.each(this.strokeInput,
+		function(index, keycode) {
+			if (keycode==8) {
+				// Backspace
+				b = b.slice(0, -1);
+			} else if (keycode>=32 && keycode<=126) {
+				// Character input.
+				b += String.fromCharCode(keycode);
+			}
+		});
+
+	this.buffer = b;
+	this.strokeInput.length = 0;
 
 	$("#answer").text(this.buffer.slice(-40));
-
-	console.log(this.strokeInput);
-	this.strokeInput.length = 0;
 
 	if (this.quiz.answerMatches(this.buffer)) {
 
@@ -192,19 +202,7 @@ PloverLearnGame.prototype.handleKeypress = function(keycode) {
 
 		this.strokeInput.push(keycode);
 
-		console.log(this.buffer);
-		if (keycode==8) {
-			// Backspace
-			this.buffer = this.buffer.slice(0, -1);
-		} else if (keycode==13) {
-			// Return: erase buffer
-			this.buffer = '';
-		} else if (keycode>=32 && keycode<=126) {
-			// Character input.
-			this.buffer += String.fromCharCode(keycode);
-		}
-		console.log(this.buffer);
-	
+
 		window.clearTimeout(this.strokeTimerID);
 		this.strokeTimerID = window.setTimeout($.proxy(this.strokeFinished, this),
 			STROKE_FINISHED_TIMEOUT);
