@@ -1,6 +1,3 @@
-
-///////////////////////////////////
-
 var PloverLearnQuiz = function(fields) {
 	this.fields = fields;
 	this.index = 0;
@@ -22,42 +19,18 @@ PloverLearnQuiz.prototype.currentHint = function() {
 	return this.fields['questions'][this.index][1];
 };
 
-// Returns whether the given answer matches the question,
+// Returns true if the given answer matches the question,
 // according to the current setup. (For example, case might
 // or might not be significant, based on the flags.)
-//
-// Return values:
-//   - 0: this is not a match
-//   - "complete": this is a perfect match
-//                    (the entire string matches)
-//   - "partial": this is a partial match
-//                    (it's partway to a complete match)
-//
-// For example, suppose the current rules mean an answer
-// matches iff it's identical to the question, and that the
-// question is "plover". Then:
-//
-//    ""       -> "partial"
-//    "plov"   -> "partial"
-//    "plover" -> "complete"
-//    "xyzzy"  -> 0
+// Returns false otherwise.
 
 PloverLearnQuiz.prototype.answerMatches = function(answer) {
 
-	if (true) {
-		var q = this.currentQuestion().toLowerCase();
-		var a = answer.toLowerCase();
+	var flags = 'i';
+	var pattern = '^'+this.currentQuestion()+'\s*$';
 
-		if (q==a) {
-			return "complete";
-		} else if (new RegExp('^'+a).test(q)) {
-			return "partial";
-		} else {
-			return 0;
-		}
-	}
-
-	return "(impossible)";
+	var questionRegExp = new RegExp(pattern, flags);
+	return questionRegExp.test(answer);
 };
 
 PloverLearnQuiz.prototype.isLastQuestion = function() {
@@ -82,6 +55,7 @@ var PloverLearnGame = function(fields) {
 	this.buffer = '';
 	this.strokeTimerID = 0;
 	this.metricsDisplayTimerID = 0;
+	this.strokeInput = new Array();
 
 	this.gameStartTime = 0;
 	this.wordCount = 0;
@@ -125,7 +99,7 @@ PloverLearnGame.prototype.displayMetrics = function() {
 	gameClock += gameClockSeconds;
 
 	$("#time").text(gameClock);
-	$("#wpm").text(Math.floor(wordCount / (msElapsed/60000)));
+	$("#wpm").text(Math.floor(this.wordCount / (msElapsed/60000)));
 	$("#misstrokes").text(this.misstrokes);
 	$("#laststreak").text(this.lastStreak);
 	$("#beststreak").text(this.bestStreak);
@@ -159,7 +133,7 @@ PloverLearnGame.prototype.logMisstroke = function() {
 	if (this.misstrokesThisQuestion >= HINT_OFFER_TIMES &&
 		$("#hint").text()=='') {
 
-		$("#hint").text(this.quiz.currentText());
+		$("#hint").text(this.quiz.currentHint());
 	}
 
 	this.previousStrokeWasGood = false;
@@ -174,25 +148,19 @@ PloverLearnGame.prototype.strokeFinished = function() {
 
 	$("#answer").text(this.buffer.slice(-40));
 
-	var question = $("#question").text()
+	console.log(this.strokeInput);
+	this.strokeInput.length = 0;
 
-// XXX this isn't going to work until we've fixed
-// PloverLearnQuiz.answerMatches() to check for partial
-// matches as well. Come back to it then.
+	if (this.quiz.answerMatches(this.buffer)) {
 
-	if (buffer==question) {
-		// correct!
+		this.logGoodStroke();
 
-		logGoodStroke();
+		this.wordCount += this.quiz.currentQuestion().split(' ').length;
+		this.displayNextQuestion();
 
-		wordCount += question.split(' ').length;
-		displayNextQuestion();
-	} else if (question.indexOf(buffer)==0) {
-		// partial match
-		logGoodStroke();
-	} else if (buffer!='') {
+	} else {
 		// misstroke
-		logMisstroke();
+		this.logMisstroke();
 	}
 };
 
@@ -206,7 +174,8 @@ PloverLearnGame.prototype.startGame = function() {
 	this.previousStrokeWasGood = true;
 	this.lastStreak = 0;
 	this.bestStreak = 0;
-	this.metricsDisplayTimerID = window.setInterval(this.displayMetrics, METRICS_DISPLAY_INTERVAL);
+	this.metricsDisplayTimerID = window.setInterval( $.proxy(this.displayMetrics, this),
+		METRICS_DISPLAY_INTERVAL);
 };
 
 PloverLearnGame.prototype.endGame = function() {
@@ -215,46 +184,55 @@ PloverLearnGame.prototype.endGame = function() {
 	$("body").removeClass("playing");
 };
 
-PloverLearnGame.prototype.initialSetup = function() {
+PloverLearnGame.prototype.handleKeypress = function(keycode) {
+
+	if (!$("body").hasClass("playing")) {
+		this.startGame();
+	} else {
+
+		this.strokeInput.push(keycode);
+
+		console.log(this.buffer);
+		if (keycode==8) {
+			// Backspace
+			this.buffer = this.buffer.slice(0, -1);
+		} else if (keycode==13) {
+			// Return: erase buffer
+			this.buffer = '';
+		} else if (keycode>=32 && keycode<=126) {
+			// Character input.
+			this.buffer += String.fromCharCode(keycode);
+		}
+		console.log(this.buffer);
+	
+		window.clearTimeout(this.strokeTimerID);
+		this.strokeTimerID = window.setTimeout($.proxy(this.strokeFinished, this),
+			STROKE_FINISHED_TIMEOUT);
+	}
+};
+
+function initialSetup(fields) {
+
+	var game = new PloverLearnGame(fields);
 
 	$(document).keypress(function(event) {
-
-		if (!$("body").hasClass("playing")) {
-			this.startGame();
-		} else {
-
-			if (event.which==8) {
-				// Backspace
-				this.buffer = this.buffer.slice(0, -1);
-			} else if (event.which==13) {
-				// Return: erase buffer
-				this.buffer = '';
-			} else if (event.which>=32 && event.which<=126) {
-				// Character input.
-				this.buffer += String.fromCharCode(event.which);
-			}
-		
-			window.clearTimeout(this.strokeTimerID);
-			this.strokeTimerID = window.setTimeout(this.strokeFinished, STROKE_FINISHED_TIMEOUT);
-		}
+		game.handleKeypress(event.which);
 	});
 
 	$("#splash").mousedown(function(event) {
-		this.startGame();
+		game.startGame();
 	});
 
 	$("#hint").mousedown(function(event) {
-		$("#hint").text(this.quiz.hint());
+		$("#hint").text(game.quiz.hint());
 	});
 
-	$("#title").text(this.quiz.title());
-	$("#subtitle").text(this.quiz.subtitle());
+	$("#title").text(game.quiz.title());
+	$("#subtitle").text(game.quiz.subtitle());
 };
 
 function ploverlearn(fields) {
 
-	var game = new PloverLearnGame(fields);
-
-	$( ploverLearn.initialSetup );
+	$(function() { initialSetup(fields) } );
 
 }
