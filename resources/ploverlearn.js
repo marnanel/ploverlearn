@@ -141,9 +141,15 @@ PloverLearnGame.prototype.logMisstroke = function() {
 
 PloverLearnGame.prototype.strokeFinished = function() {
 
+	// make sure we *have* a stroke, just in case.
+	if (this.strokeInput.length==0) {
+		return;
+	}
+
 	// we take a copy of this.buffer
 	// because "this" is obscured by $.each()
 	var b = this.buffer;
+	var isCorrection = true;
 
 	$.each(this.strokeInput,
 		function(index, keycode) {
@@ -154,6 +160,10 @@ PloverLearnGame.prototype.strokeFinished = function() {
 				// Character input.
 				b += String.fromCharCode(keycode);
 			}
+
+			if (keycode!=8) {
+				isCorrection = false;
+			}
 		});
 
 	this.buffer = b;
@@ -161,16 +171,16 @@ PloverLearnGame.prototype.strokeFinished = function() {
 
 	$("#answer").text(this.buffer.slice(-40));
 
+	if (isCorrection) {
+		this.logMisstroke();
+	}
+
 	if (this.quiz.answerMatches(this.buffer)) {
 
 		this.logGoodStroke();
 
 		this.wordCount += this.quiz.currentQuestion().split(' ').length;
 		this.displayNextQuestion();
-
-	} else {
-		// misstroke
-		this.logMisstroke();
 	}
 };
 
