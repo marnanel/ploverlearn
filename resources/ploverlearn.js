@@ -27,10 +27,16 @@ PloverLearnQuiz.prototype.currentHint = function() {
 PloverLearnQuiz.prototype.answerMatches = function(answer) {
 
 	var flags = '';
-	var pattern = '^\\s*'+this.currentQuestion()+'$';
+	var pattern;
 
 	if (!this.fields['case_sensitive']) {
 		flags = flags + 'i';
+	}
+
+	if (this.fields['require_spaces']) {
+		pattern = '^\\s*'+this.currentQuestion()+'\\s+$';
+	} else {
+		pattern = '^\\s*'+this.currentQuestion()+'$';
 	}
 
 	var questionRegExp = new RegExp(pattern, flags);
