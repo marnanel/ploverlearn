@@ -124,10 +124,6 @@ PloverLearnGame.prototype.displayMetrics = function() {
 	$("#beststreak").text(this.bestStreak);
 };
 
-// XXX problem here: does a streak include
-// all strokes that make a correct word?
-// Because then you'd get extra marks for fingerspelling everything.
-
 PloverLearnGame.prototype.logGoodStroke = function() {
 
 	if (this.previousStrokeWasGood) {
