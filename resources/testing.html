@@ -8,6 +8,7 @@
 <body>
   <div id="qunit"></div>
   <div id="qunit-fixture"></div>
+  <script src="jquery.min.js"></script>
   <script src="https://code.jquery.com/qunit/qunit-1.20.0.js"></script>
   <script src="ploverlearn.js"></script>
   <script>
@@ -105,7 +106,19 @@
 	assert.equal(pl.answerMatches('Prune '), false, "Different word with space");
     });
 
+    QUnit.test( "string matching - ignore characters", function( assert ) {
+	var fields = standardTestFields();
 
+    	fields['ignore_characters'] = '%';
+	var pl = new PloverLearnQuiz(fields);
+
+	assert.equal(pl.currentQuestion(), "Apple", "Current question is 'Apple'");
+	assert.equal(pl.answerMatches('Apple'), true, "Exact match");
+	assert.equal(pl.answerMatches('%Apple'), true, "Ignored character at start");
+	assert.equal(pl.answerMatches('Apple%'), true, "Ignored character at end");
+	assert.equal(pl.answerMatches('%A%%pp%le%%'), true, "Ignored many characters");
+    });
+	
   </script>
 </body>
 </html>
