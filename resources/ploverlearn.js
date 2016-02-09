@@ -26,17 +26,26 @@ PloverLearnQuiz.prototype.currentHint = function() {
 
 PloverLearnQuiz.prototype.answerMatches = function(answer) {
 
+	var question = this.currentQuestion();
 	var flags = '';
 	var pattern;
+
+	if (this.fields['ignore_characters']) {
+		$.each(this.fields['ignore_characters'].split(''),
+		function(i, char) {
+			answer = answer.split(char).join('');
+			question = question.split(char).join('');
+		});
+	}
 
 	if (!this.fields['case_sensitive']) {
 		flags = flags + 'i';
 	}
 
 	if (this.fields['require_spaces']) {
-		pattern = '^\\s*'+this.currentQuestion()+'\\s+$';
+		pattern = '^\\s*'+question+'\\s+$';
 	} else {
-		pattern = '^\\s*'+this.currentQuestion()+'$';
+		pattern = '^\\s*'+question+'$';
 	}
 
 	var questionRegExp = new RegExp(pattern, flags);
