@@ -26,8 +26,12 @@ PloverLearnQuiz.prototype.currentHint = function() {
 
 PloverLearnQuiz.prototype.answerMatches = function(answer) {
 
-	var flags = 'i';
+	var flags = '';
 	var pattern = '^\\s*'+this.currentQuestion()+'$';
+
+	if (!this.fields['case_sensitive']) {
+		flags = flags + 'i';
+	}
 
 	var questionRegExp = new RegExp(pattern, flags);
 	return questionRegExp.test(answer);
