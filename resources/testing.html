@@ -60,15 +60,28 @@
 	var pl = new PloverLearnQuiz(fields);
 
 	assert.equal(pl.currentQuestion(), "Apple", "Current question is 'Apple'");
-	assert.equal(pl.answerMatches('Apple'), "complete", "Exact match: complete");
-	assert.equal(pl.answerMatches('apple'), "complete", "Lowercase: complete");
-	assert.equal(pl.answerMatches('APPLE'), "complete", "Uppercase: complete");
-	assert.equal(pl.answerMatches('ApPlE'), "complete", "Weird case mix: complete");
-	assert.equal(pl.answerMatches('App'),   "partial",  "First three characters: partial");
-	assert.equal(pl.answerMatches('ap'),    "partial",  "First two characters, lowercase: partial");
-	assert.equal(pl.answerMatches(''),      "partial",  "Empty string: partial");
-	assert.equal(pl.answerMatches('P'),     0,          "Different letter: 0");
-	assert.equal(pl.answerMatches('Prune'), 0,          "Different word: 0");
+	assert.equal(pl.answerMatches('Apple'), true, "Exact match");
+	assert.equal(pl.answerMatches('apple'), true, "Lowercase");
+	assert.equal(pl.answerMatches('APPLE'), true, "Uppercase");
+	assert.equal(pl.answerMatches('ApPlE'), true, "Weird case mix");
+	assert.equal(pl.answerMatches('App'),   false, "Partial");
+	assert.equal(pl.answerMatches('P'),     false, "Different letter");
+	assert.equal(pl.answerMatches('Prune'), false, "Different word");
+    });
+
+    QUnit.test( "string matching - case sensitive", function( assert ) {
+	var fields = standardTestFields();
+	fields['case_sensitive'] = true;
+	var pl = new PloverLearnQuiz(fields);
+
+	assert.equal(pl.currentQuestion(), "Apple", "Current question is 'Apple'");
+	assert.equal(pl.answerMatches('Apple'), true,  "Exact match");
+	assert.equal(pl.answerMatches('apple'), false, "Lowercase");
+	assert.equal(pl.answerMatches('APPLE'), false, "Uppercase");
+	assert.equal(pl.answerMatches('ApPlE'), false, "Weird case mix");
+	assert.equal(pl.answerMatches('App'),   false, "Partial");
+	assert.equal(pl.answerMatches('P'),     false, "Different letter");
+	assert.equal(pl.answerMatches('Prune'), false, "Different word");
     });
 
 
