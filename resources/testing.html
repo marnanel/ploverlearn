@@ -71,7 +71,7 @@
 
     QUnit.test( "string matching - case sensitive", function( assert ) {
 	var fields = standardTestFields();
-	fields['case_sensitive'] = true;
+	fields['case_sensitive'] = 'true';
 	var pl = new PloverLearnQuiz(fields);
 
 	assert.equal(pl.currentQuestion(), "Apple", "Current question is 'Apple'");
