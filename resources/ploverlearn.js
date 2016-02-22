@@ -227,7 +227,6 @@ PloverLearnGame.prototype.handleKeypress = function(keycode) {
 
 		this.strokeInput.push(keycode);
 
-
 		window.clearTimeout(this.strokeTimerID);
 		this.strokeTimerID = window.setTimeout($.proxy(this.strokeFinished, this),
 			STROKE_FINISHED_TIMEOUT);
