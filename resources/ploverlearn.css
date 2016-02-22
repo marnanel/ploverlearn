@@ -83,3 +83,12 @@ td {
 	text-align: center;
 }
 
+.credits {
+	width: 640px;
+	text-align: center;
+	color: #888;
+}
+
+.credits *:link, .credits *:visited {
+	color: inherit !important;
+}
