@@ -242,7 +242,12 @@ function initialSetup(fields) {
 
 		// Prevent default action. Otherwise pressing
 		// slash or apostrophe steals the focus.
-		event.preventDefault();
+		// 48 is the ASCII code for "0", which
+		// allows letters and numbers to steal focus.
+		// This lets users press ctrl-R to reload, etc.
+		if (event.which < 48) {
+			event.preventDefault();
+		}
 
 		game.handleKeypress(event.which);
 	});
