@@ -93,6 +93,7 @@ var HINT_TEXT = '(hint?)';
 PloverLearnGame.prototype.displayNextQuestion = function() {
 
 	if (this.quiz.isLastQuestion()) {
+		this.quiz.moveToNextQuestion();
 		this.endGame();
 	} else {
 		this.quiz.moveToNextQuestion();
