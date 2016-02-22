@@ -148,7 +148,7 @@ PloverLearnGame.prototype.logMisstroke = function() {
 	if (this.misstrokesThisQuestion >= HINT_OFFER_TIMES &&
 		$("#hint").text()=='') {
 
-		$("#hint").text(this.quiz.currentHint());
+		$("#hint").text(HINT_TEXT);
 	}
 
 	this.previousStrokeWasGood = false;
@@ -252,7 +252,7 @@ function initialSetup(fields) {
 	});
 
 	$("#hint").mousedown(function(event) {
-		$("#hint").text(game.quiz.hint());
+		$("#hint").text(game.quiz.currentHint());
 	});
 
 	$("#title").text(game.quiz.title());
