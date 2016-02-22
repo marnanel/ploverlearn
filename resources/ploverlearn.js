@@ -239,6 +239,11 @@ function initialSetup(fields) {
 	var game = new PloverLearnGame(fields);
 
 	$(document).keypress(function(event) {
+
+		// Prevent default action. Otherwise pressing
+		// slash or apostrophe steals the focus.
+		event.preventDefault();
+
 		game.handleKeypress(event.which);
 	});
 
