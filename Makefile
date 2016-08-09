@@ -3,3 +3,6 @@ ploverlearn:
 	cp resources/* build
 	rm build/template.html
 	python src/translate-lessons.py
+
+clean:
+	rm -r build
