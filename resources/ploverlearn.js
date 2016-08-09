@@ -1,6 +1,6 @@
 var PloverLearnQuiz = function(fields) {
 	this.fields = fields;
-	this.index = 0;
+	this.index = -1;
 };
 
 PloverLearnQuiz.prototype.title = function() {
@@ -58,7 +58,7 @@ PloverLearnQuiz.prototype.isLastQuestion = function() {
 
 PloverLearnQuiz.prototype.moveToNextQuestion = function() {
 	if (this.isLastQuestion()) {
-		this.index = 0;
+		this.index = -1;
 	} else {
 		this.index++;
 	}
