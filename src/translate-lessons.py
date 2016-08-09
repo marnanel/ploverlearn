@@ -16,12 +16,12 @@ def parse_lesson_file(filename):
 
 	questions = []
 	for line in lines[2:]:
-		if line.startswith("'"):
-			(word, hint) = line.split(':')
-			word = word.replace("'",'').strip()
+		if line.startswith("'") and line.find("': ") > 1:
+			(word, hint) = line.split("': ")
+			word = word.replace("'", '', 1).strip()
 			hint = hint.strip()
 			questions.append([word,hint])
-		else:
+		elif line.find('=') > -1:
 			(name, value) = line.split('=')
 			fields[name] = value
 
@@ -74,9 +74,5 @@ def main():
 			if x=='lesson.txt'],
 			None)
 
-	handle_lesson_file('lessons/Lesson10/lesson.txt',
-		template=template)
-
 if __name__=='__main__':
 	main()
-
